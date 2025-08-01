@@ -1,21 +1,20 @@
-import './globals.css'
-import Navbar from './components/Navbar'
-import SessionWrapper from './components/SessionWrapper'
+// app/layout.js
+import SessionWrapper from './components/SessionWrapper';
+import Navbar from './components/Navbar';
 
 export const metadata = {
   title: 'Expense Receipt Uploader',
-  description: 'A simple app to manage expenses',
-}
+};
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <SessionWrapper>
       <body>
-        <Navbar />
-        {children}
+        <SessionWrapper>
+          <Navbar />
+          {children}
+        </SessionWrapper>
       </body>
-      </SessionWrapper>
     </html>
-  )
+  );
 }

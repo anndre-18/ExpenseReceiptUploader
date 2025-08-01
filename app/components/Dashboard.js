@@ -1,34 +1,90 @@
 'use client';
-import styles from '@/app/page.module.css';
-import { useRouter } from 'next/navigation';
+import React, { useEffect, useState } from 'react';
+import styles from '@/app/components.module.css';
+import '@fortawesome/fontawesome-free/css/all.min.css';
 
-export default function Dashboard({ receipts = [] }) {
-  const router = useRouter();
+export default function Receipts() {
+  const [receipts, setReceipts] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  useEffect(() => {
+    // Replace with your actual API route
+    const fetchReceipts = async () => {
+      try {
+        const res = await fetch('/api/receipts'); // make sure this API exists
+        const data = await res.json();
+        setReceipts(data);
+      } catch (error) {
+        console.error('Failed to fetch receipts:', error);
+      }
+    };
+
+    fetchReceipts();
+  }, []);
+
+  const filteredReceipts = receipts.filter((r) =>
+    r.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
-    <div className={styles.dashboard}>
-      <h2 className={styles.title}>Dashboard Page</h2>
+    <div className={styles.receiptsContainer}>
+      <div className={styles.dashboardHeader}>
+        <div>
+          <h2>Receipt Dashboard</h2>
+          <p>Manage and organize your expense receipts</p>
+        </div>
+        <div className={styles.receiptCount}>{receipts.length} receipts</div>
+      </div>
 
-      <div className={styles.main}>
-        <div className={styles.receiptContainer}>
-          {receipts.map((receipt, index) => (
-            <div className={styles.receiptCard} key={index}>
-              <img src={receipt.image || '/placeholder.png'} alt="receipt" />
-              <div className={styles.receiptInfo}>
-                <p>{receipt.title}</p>
-                <p>{receipt.amount}</p>
-                <p>{receipt.type}</p>
+      <div className={styles.searchFilters}>
+        <input
+          type="text"
+          className={styles.searchInput}
+          placeholder="🔍 Search receipts..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+        <select className={styles.filterDropdown}>
+          <option>All Tags</option>
+        </select>
+        <select className={styles.filterDropdown}>
+          <option>Newest First</option>
+        </select>
+      </div>
+
+      <div className={styles.receiptGrid}>
+        {filteredReceipts.map((receipt) => (
+          <div key={receipt._id || receipt.id} className={styles.receiptCard}>
+            <div className={styles.receiptPreview}>📄</div>
+            <div className={styles.receiptContent}>
+              <h3>{receipt.title}</h3>
+              <p>{receipt.description}</p>
+              <div className={styles.tags}>
+                {receipt.tags.map((tag) => (
+                  <span key={tag} className={styles.tag}>
+                    {tag}
+                  </span>
+                ))}
+              </div>
+              <div className={styles.bottomRow}>
+                <span className={styles.date}>{receipt.date}</span>
+                <span className={styles.amount}>{receipt.amount}</span>
+              </div>
+
+              <div className={styles.actionButtons}>
+                <button className={styles.outlinedButton}>
+                  <i className="fas fa-eye"></i> View
+                </button>
+                <button className={styles.iconButton}>
+                  <i className="fas fa-download"></i>
+                </button>
+                <button className={styles.iconButton}>
+                  <i className="fas fa-trash-alt"></i>
+                </button>
               </div>
             </div>
-          ))}
-        </div>
-
-        <div className={styles.sidebar}>
-          <button onClick={() => router.push('/upload')}>Upload Receipts</button>
-          <div className={styles.totalBox}>
-            Total Receipts: {receipts.length}
           </div>
-        </div>
+        ))}
       </div>
     </div>
   );

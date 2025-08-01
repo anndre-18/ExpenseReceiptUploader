@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { signIn, signOut, useSession } from 'next-auth/react';
 import styles from '../page.module.css';
+// import styles from '@/app/components.module.css'
 
 export default function Navbar() {
   const router = useRouter();
@@ -16,7 +17,7 @@ export default function Navbar() {
   const handleGitHubLogin = () => {
     signIn('github', { 
       prompt: 'select_account',
-      callbackUrl: '/login'
+      callbackUrl: '/receipts'
     });
   };
 
@@ -35,9 +36,11 @@ export default function Navbar() {
           <p>Loading...</p>
         ) : session ? (
           <>
-            <button onClick={() => router.push('/upload')}>Upload</button>
-            <button onClick={() => router.push('/receipts')}>Receipts</button>
-            <button onClick={handleLogout}>Sign Out</button>
+          <div className={styles.cta}>
+            <button onClick={() => router.push('/upload')} className={styles.navButton}>Upload</button>
+            <button onClick={() => router.push('/receipts')} className={styles.navButton}>Dashboard</button>
+          </div>
+            <button onClick={handleLogout} className={styles.signOut}>Sign Out</button>
             <div className={styles.userInfo}>
               <img
                 src={session.user.image}
@@ -48,7 +51,7 @@ export default function Navbar() {
             </div>
           </>
         ) : (
-          <button onClick={handleLogin}>Login with GitHub</button>
+          <button onClick={handleGitHubLogin} className={styles.signIn}>Login with GitHub</button>
         )}
       </div>
     </nav>

@@ -1,9 +1,11 @@
 import { writeFile } from 'fs/promises';
-import fs from 'fs';
 import path from 'path';
-import { Readable } from 'stream';
-import { IncomingForm } from 'formidable';
+import { v4 as uuidv4 } from 'uuid';
 import { NextResponse } from 'next/server';
+import { connectDB } from '@/lib/db';
+import Receipt from '@/models/Receipt';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '../auth/[...nextauth]/route';
 
 export const config = {
   api: {
@@ -11,53 +13,33 @@ export const config = {
   },
 };
 
-function reqToIncomingMessage(req) {
-  const headers = {};
-  req.headers.forEach((value, key) => {
-    headers[key.toLowerCase()] = value;
-  });
-
-  const readable = Readable.from(req.body);
-
-  return Object.assign(readable, {
-    headers,
-    method: req.method,
-    url: '',
-  });
-}
-
 export async function POST(req) {
-  try {
-    const incomingReq = reqToIncomingMessage(req);
-
-    const form = new IncomingForm({ keepExtensions: true });
-
-    const data = await new Promise((resolve, reject) => {
-      form.parse(incomingReq, (err, fields, files) => {
-        if (err) reject(err);
-        else resolve({ fields, files });
-      });
-    });
-
-    // ✅ SAFELY EXTRACT FILE
-    const file = Array.isArray(data.files.file)
-      ? data.files.file[0]
-      : data.files.file;
-
-    if (!file || !file.filepath) {
-      return NextResponse.json({ message: 'No file received' }, { status: 400 });
-    }
-
-    const ext = path.extname(file.originalFilename || '');
-    const fileName = `${Date.now()}${ext}`;
-    const uploadPath = path.join(process.cwd(), 'public', 'uploads', fileName);
-
-    const fileData = fs.readFileSync(file.filepath);
-    await writeFile(uploadPath, fileData);
-
-    return NextResponse.json({ message: 'Upload successful', fileName });
-  } catch (err) {
-    console.error('Upload error:', err);
-    return NextResponse.json({ message: 'Upload failed' }, { status: 500 });
+  const session = await getServerSession(authOptions);
+  if (!session || !session.user?.email) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
+
+  const formData = await req.formData();
+  const file = formData.get('receipt');
+  const type = formData.get('type');
+
+  if (!file || !file.name || !type) {
+    return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
+  }
+
+  const buffer = Buffer.from(await file.arrayBuffer());
+  const fileName = `${uuidv4()}-${file.name}`;
+  const filePath = path.join(process.cwd(), 'public', 'uploads', fileName);
+
+  await writeFile(filePath, buffer);
+
+  await connectDB();
+
+  const receipt = await Receipt.create({
+    user: session.user.email, // 👈 Stores GitHub email as identifier
+    type,
+    imageUrl: `/uploads/${fileName}`,
+  });
+
+  return NextResponse.json({ success: true, receipt });
 }

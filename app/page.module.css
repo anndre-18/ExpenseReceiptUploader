@@ -62,14 +62,15 @@
   justify-content: space-between;
   align-items: center;
   padding: 15px 30px;
-  background-color: var(--primarytext);
-  border-bottom: 2px solid #B9FF66;
+  /* background-color: var(--primarytext); */
+  background: #fff;
+  border-bottom: 1px solid #B9FF66;
 }
 
 .logo {
   font-size: 15px;
   font-weight: bold;
-  color: #B9FF66;
+  color: #191A23;
   cursor: pointer;
 }
 
@@ -78,7 +79,11 @@
   gap: 10px;
 }
 
-.links button {
+.cta{
+  align-items: center;
+}
+
+.signIn, .signOut {
   height: fit-content;
   width: fit-content;
   padding: 10px 15px;
@@ -92,7 +97,22 @@
   transition: background-color 0.3s;
 }
 
-.links button:hover {
+
+ .navButton{
+   height: fit-content;
+  width: fit-content;
+  padding: 10px 15px;
+  
+  /* background-color: var(--ctabuttons); */
+  color:var(--primarytext);
+  /* border: none; */
+  /* border-radius: 5px; */
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.3s;
+ }
+
+ .links button:hover {
   background-color: var(--ctabuttonshover)
 }
 

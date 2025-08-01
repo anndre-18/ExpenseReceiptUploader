@@ -1,75 +1,90 @@
-import React from 'react'
-import Dashboard from '@/app/components/Dashboard'
+'use client';
 
-const page = () => {
+import React, { useEffect, useState } from 'react';
+import styles from '@/app/components.module.css';
+import '@fortawesome/fontawesome-free/css/all.min.css';
+
+export default function Page() {
+  const [receipts, setReceipts] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  useEffect(() => {
+    const fetchReceipts = async () => {
+      try {
+        const res = await fetch('/api/receipts');
+        const data = await res.json();
+        setReceipts(data);
+      } catch (error) {
+        console.error('Error fetching receipts:', error);
+      }
+    };
+
+    fetchReceipts();
+  }, []);
+
+  const filteredReceipts = receipts.filter((receipt) =>
+    receipt.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
-    <div>
-      <Dashboard/>
-      
+    <div className={styles.receiptsContainer}>
+      <div className={styles.dashboardHeader}>
+        <div>
+          <h2>Receipt Dashboard</h2>
+          <p>Manage and organize your expense receipts</p>
+        </div>
+        <div className={styles.receiptCount}>{receipts.length} receipts</div>
+      </div>
+
+      <div className={styles.searchFilters}>
+        <input
+          type="text"
+          className={styles.searchInput}
+          placeholder="🔍 Search receipts..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+        <select className={styles.filterDropdown}>
+          <option>All Tags</option>
+        </select>
+        <select className={styles.filterDropdown}>
+          <option>Newest First</option>
+        </select>
+      </div>
+
+      <div className={styles.receiptGrid}>
+        {filteredReceipts.map((receipt) => (
+          <div key={receipt._id || receipt.id} className={styles.receiptCard}>
+            <div className={styles.receiptPreview}>📄</div>
+            <div className={styles.receiptContent}>
+              <h3>{receipt.title}</h3>
+              <p>{receipt.description}</p>
+              <div className={styles.tags}>
+                {receipt.tags.map((tag) => (
+                  <span key={tag} className={styles.tag}>
+                    {tag}
+                  </span>
+                ))}
+              </div>
+              <div className={styles.bottomRow}>
+                <span className={styles.date}>{receipt.date}</span>
+                <span className={styles.amount}>{receipt.amount}</span>
+              </div>
+              <div className={styles.actionButtons}>
+                <button className={styles.outlinedButton}>
+                  <i className="fas fa-eye"></i> View
+                </button>
+                <button className={styles.iconButton}>
+                  <i className="fas fa-download"></i>
+                </button>
+                <button className={styles.iconButton}>
+                  <i className="fas fa-trash-alt"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
-  )
+  );
 }
-
-export default page
-
-
-
-
-
-
-
-
-
-
-
-// // View receipts page
-// 'use client'
-// import { useEffect, useState } from 'react'
-// import styles from '../page.module.css'
-
-// export default function ReceiptsPage() {
-//   const [receipts, setReceipts] = useState([])
-//   const [error, setError] = useState('')
-
-//   useEffect(() => {
-//     const token = localStorage.getItem('token')
-//     if (!token) {
-//       setError('Unauthorized access')
-//       return
-//     }
-
-//     const fetchReceipts = async () => {
-//       const res = await fetch('/api/receipts', {
-//         headers: {
-//           Authorization: `Bearer ${token}`,
-//         },
-//       })
-
-//       const data = await res.json()
-//       if (res.ok) {
-//         setReceipts(data.receipts || [])
-//       } else {
-//         setError(data.message || 'Failed to fetch receipts')
-//       }
-//     }
-
-//     fetchReceipts()
-//   }, [])
-
-//   return (
-//     <div className={styles.receiptsPage}>
-//       <h2>Your Receipts</h2>
-//       {error && <p className={styles.error}>{error}</p>}
-//       <ul className={styles.receiptList}>
-//         {receipts.map((r) => (
-//           <li key={r._id} className={styles.receiptCard}>
-//             <strong>{r.title}</strong> – {r.amount} ₹ <br />
-//             Type: {r.type} <br />
-//             <small>{new Date(r.date).toLocaleString()}</small>
-//           </li>
-//         ))}
-//       </ul>
-//     </div>
-//   )
-// }
-

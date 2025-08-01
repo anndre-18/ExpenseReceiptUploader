@@ -6,7 +6,8 @@ const ReceiptSchema = new mongoose.Schema({
   tags: [String],
   date: String,
   amount: String,
-  userId: String, // Store GitHub user ID or email
+  userId: String, //github userid
+  imageUrl: String, // ✅ Add this field
 });
 
 export default mongoose.models.Receipt || mongoose.model("Receipt", ReceiptSchema);

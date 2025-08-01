@@ -21,9 +21,13 @@ export async function POST(req) {
 
   const formData = await req.formData();
   const file = formData.get('receipt');
-  const type = formData.get('type');
+  const title = formData.get('title');
+  const description = formData.get('description');
+  const tags = formData.get('tags');
+  const date = formData.get('date');
+  const amount = formData.get('amount');
 
-  if (!file || !file.name || !type) {
+  if (!file || !title || !description || !tags || !date || !amount) {
     return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
   }
 
@@ -32,13 +36,16 @@ export async function POST(req) {
   const filePath = path.join(process.cwd(), 'public', 'uploads', fileName);
 
   await writeFile(filePath, buffer);
-
   await connectDB();
 
   const receipt = await Receipt.create({
-    user: session.user.email, // 👈 Stores GitHub email as identifier
-    type,
-    imageUrl: `/uploads/${fileName}`,
+    title,
+    description,
+    tags: tags.split(',').map(tag => tag.trim()),
+    date,
+    amount,
+    imageUrl: `/uploads/${fileName}`, // ✅ Include the image path
+    userId: session.user.email,
   });
 
   return NextResponse.json({ success: true, receipt });

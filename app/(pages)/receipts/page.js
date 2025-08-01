@@ -55,7 +55,17 @@ export default function Page() {
       <div className={styles.receiptGrid}>
         {filteredReceipts.map((receipt) => (
           <div key={receipt._id || receipt.id} className={styles.receiptCard}>
-            <div className={styles.receiptPreview}>📄</div>
+            <div className={styles.receiptPreview}>
+              {receipt.imageUrl ? (
+                <img
+                  src={receipt.imageUrl}
+                  alt={receipt.title}
+                  className={styles.receiptImage}
+                />
+              ) : (
+                <span>📄</span>
+              )}
+            </div>
             <div className={styles.receiptContent}>
               <h3>{receipt.title}</h3>
               <p>{receipt.description}</p>
@@ -68,7 +78,7 @@ export default function Page() {
               </div>
               <div className={styles.bottomRow}>
                 <span className={styles.date}>{receipt.date}</span>
-                <span className={styles.amount}>{receipt.amount}</span>
+                <span className={styles.amount}>₹{receipt.amount}</span>
               </div>
               <div className={styles.actionButtons}>
                 <button className={styles.outlinedButton}>

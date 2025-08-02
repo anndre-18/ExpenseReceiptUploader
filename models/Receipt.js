@@ -1,13 +1,16 @@
+// models/Receipt.js
 import mongoose from "mongoose";
 
-const ReceiptSchema = new mongoose.Schema({
+// models/Receipt.js
+const receiptSchema = new mongoose.Schema({
   title: String,
   description: String,
-  tags: [String],
+  tags: String, // Changed from [String] to String
   date: String,
   amount: String,
-  userId: String, //github userid
-  imageUrl: String, // ✅ Add this field
-});
+  imageUrl: String,
+  userId: String, // optional for now
+}, { timestamps: true }); // ✅ this is important
 
-export default mongoose.models.Receipt || mongoose.model("Receipt", ReceiptSchema);
+
+export default mongoose.models.Receipt || mongoose.model("Receipt", receiptSchema);

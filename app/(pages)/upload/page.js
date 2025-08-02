@@ -1,17 +1,43 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import styles from '@/app/components.module.css';
 
+const STATIC_TAGS = ["Food", "Travel", "Medical", "Entertainment", "Office", "Business", "Shopping", "Education", "Utility", "Other"]
+
+
 export default function UploadReceiptPage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [tags, setTags] = useState('');
+  const [selectedTag, setSelectedTag] = useState('');
+  const [customTags, setCustomTags] = useState('');
   const [date, setDate] = useState('');
   const [amount, setAmount] = useState('');
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
   const [message, setMessage] = useState('');
+
+  // Authentication check - must be first useEffect
+  useEffect(() => {
+    if (status === 'loading') return;
+    if (!session) {
+      router.push('/');
+    }
+  }, [session, status, router]);
+
+  // Show loading while checking authentication
+  if (status === 'loading') {
+    return <div className={styles.loading}>Loading...</div>;
+  }
+
+  // Don't render if not authenticated
+  if (!session) {
+    return null;
+  }
 
   const handleFileChange = (e) => {
     const selected = e.target.files[0];
@@ -21,15 +47,17 @@ export default function UploadReceiptPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!file || !title || !description || !tags || !date || !amount) {
-      setMessage('Please fill all fields');
+    if (!file || !title || !description || !selectedTag || !date || !amount) {
+      setMessage('Please fill all fields including tag selection');
       return;
     }
+
+    console.log('Submitting with tag:', selectedTag);
 
     const formData = new FormData();
     formData.append('title', title);
     formData.append('description', description);
-    formData.append('tags', tags); // comma-separated
+    formData.append('tags', selectedTag); // Send as simple string
     formData.append('date', date);
     formData.append('amount', amount);
     formData.append('receipt', file);
@@ -45,7 +73,8 @@ export default function UploadReceiptPage() {
         setMessage('✅ Upload successful!');
         setTitle('');
         setDescription('');
-        setTags('');
+        setSelectedTag('');
+        setCustomTags('');
         setDate('');
         setAmount('');
         setFile(null);
@@ -84,15 +113,32 @@ export default function UploadReceiptPage() {
         </label>
 
         <label className={styles.uploadLabel}>
-          Tags (comma-separated):
-          <input
-            type="text"
-            value={tags}
-            onChange={(e) => setTags(e.target.value)}
+          Select a Tag:
+          <select
+            value={selectedTag}
+            onChange={(e) => setSelectedTag(e.target.value)}
             className={styles.uploadInput}
             required
-          />
+          >
+            <option value="">-- Select a Tag --</option>
+            {STATIC_TAGS.map((tag) => (
+              <option key={tag} value={tag}>
+                {tag}
+              </option>
+            ))}
+          </select>
         </label>
+
+        {/* <label className={styles.uploadLabel}>
+          Additional Tags (comma-separated):
+          <input
+            type="text"
+            value={customTags}
+            onChange={(e) => setCustomTags(e.target.value)}
+            className={styles.uploadInput}
+            placeholder="e.g. groceries, taxi"
+          />
+        </label> */}
 
         <label className={styles.uploadLabel}>
           Date:

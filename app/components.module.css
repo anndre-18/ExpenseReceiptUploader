@@ -119,8 +119,9 @@
 .logo {
   font-size: 1.6rem;
   font-weight: 700;
-  color: #a8ff60;
+  color: #b2ff4d;
   cursor: pointer;
+  text-decoration: none;
 }
 
 /* Right side buttons and avatar */
@@ -128,7 +129,9 @@
   display: flex;
   align-items: center;
   gap: 16px;
+  
 }
+
 
 /* Buttons */
 /* .navButton, */
@@ -147,10 +150,15 @@
   /* background-color: #ccff66; */
   border: none;
   color: #111;
+  text-decoration: none;
+  padding: 10px 5px;
+  border-radius: 10px;
+  transition: all 0.2s ease-in-out;
 }
 
+
 .navButton:hover {
-  background-color: #b2ff4d;
+  background-color: #ccff66;
 }
 
 /* Logout button */
@@ -171,7 +179,7 @@
   color: #111;
 }
 
-.loginButton:hover {
+.loginButton,.logoutButton:hover {
   background-color: #b2ff4d;
 }
 
@@ -326,6 +334,7 @@
   font-weight: 600;
   color: #a8ff60;
 }
+
 .actionButtons {
   display: flex;
   gap: 12px;
@@ -476,3 +485,4 @@
   border: 1px solid #b2ff4d;
   margin-bottom: 12px;
 }
+

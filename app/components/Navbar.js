@@ -1,57 +1,55 @@
 'use client';
-
-import { useRouter } from 'next/navigation';
-import { signIn, signOut, useSession } from 'next-auth/react';
-import styles from '../page.module.css';
-// import styles from '@/app/components.module.css'
+import { useSession, signIn, signOut } from 'next-auth/react';
+import Link from 'next/link';
+import styles from '@/app/components.module.css';
 
 export default function Navbar() {
-  const router = useRouter();
   const { data: session, status } = useSession();
 
-  // 🔐 Always ask for account selection
-  const handleLogin = () => {
-    signIn('github', { prompt: 'login' }); // Forces GitHub to show account chooser
-  };
-  
-  const handleGitHubLogin = () => {
-    signIn('github', { 
-      prompt: 'select_account',
-      callbackUrl: '/receipts'
-    });
-  };
-
-  const handleLogout = async () => {
-    await signOut({ redirect: false }); // Silent sign-out
-  };
+  if (status === 'loading') {
+    return (
+      <nav className={styles.navbar}>
+        <div className={styles.logo}>ExpeneSnap</div>
+        <div className={styles.loading}>Loading...</div>
+      </nav>
+    );
+  }
 
   return (
     <nav className={styles.navbar}>
-      <div className={styles.logo} onClick={() => router.push('/')}>
-        EXPENSNAP
-      </div>
+      <Link href="/" className={styles.logo}>
+        ExpenSnap
+      </Link>
 
       <div className={styles.links}>
-        {status === 'loading' ? (
-          <p>Loading...</p>
-        ) : session ? (
+        {session ? (
           <>
-          <div className={styles.cta}>
-            <button onClick={() => router.push('/upload')} className={styles.navButton}>Upload</button>
-            <button onClick={() => router.push('/receipts')} className={styles.navButton}>Dashboard</button>
-          </div>
-            <button onClick={handleLogout} className={styles.signOut}>Sign Out</button>
+            <Link href="/upload" className={styles.navButton}>
+              <i className="fas fa-upload"></i> Upload
+            </Link>
+            <Link href="/receipts" className={styles.navButton}>
+              <i className="fas fa-receipt"></i> Dashboard
+            </Link>
             <div className={styles.userInfo}>
+              
               <img
                 src={session.user.image}
                 alt={session.user.name}
                 className={styles.avatar}
               />
-              <span className={styles.username}>{session.user.name}</span>
+              
+              <span className={styles.username}>
+                {session.user?.name || session.user?.email || 'User'}
+              </span>
             </div>
+            <button onClick={() => signOut({ callbackUrl: '/' })} className={styles.logoutButton}>
+              <i className="fas fa-sign-out-alt"></i> Logout
+            </button>
           </>
         ) : (
-          <button onClick={handleGitHubLogin} className={styles.signIn}>Login with GitHub</button>
+          <button onClick={() => signIn()} className={styles.loginButton}>
+            <i className="fas fa-sign-in-alt"></i> Login
+          </button>
         )}
       </div>
     </nav>

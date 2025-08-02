@@ -1,18 +1,19 @@
+// app/api/receipts/route.js
+
 import { NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import Receipt from '@/models/Receipt';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '../auth/[...nextauth]/route';
 
 export async function GET() {
-  const session = await getServerSession(authOptions);
-  if (!session || !session.user?.email) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  try {
+    await connectDB();
+
+    // Fetch ALL receipts, no filters
+    const receipts = await Receipt.find().sort({ createdAt: -1 });
+
+    return NextResponse.json(receipts);
+  } catch (err) {
+    console.error('API Error:', err);
+    return NextResponse.json({ error: 'Failed to fetch receipts' }, { status: 500 });
   }
-
-  await connectDB();
-
-  const receipts = await Receipt.find({ userId: session.user.email }).sort({ date: -1 });
-
-  return NextResponse.json(receipts);
 }

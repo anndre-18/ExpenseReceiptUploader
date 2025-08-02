@@ -4,8 +4,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import Receipt from '@/models/Receipt';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '../auth/[...nextauth]/route';
 
 export const config = {
   api: {
@@ -14,11 +12,6 @@ export const config = {
 };
 
 export async function POST(req) {
-  const session = await getServerSession(authOptions);
-  if (!session || !session.user?.email) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
   const formData = await req.formData();
   const file = formData.get('receipt');
   const title = formData.get('title');
@@ -27,7 +20,9 @@ export async function POST(req) {
   const date = formData.get('date');
   const amount = formData.get('amount');
 
-  if (!file || !title || !description || !tags || !date || !amount) {
+  console.log('Upload request - Tags received:', tags, 'Type:', typeof tags);
+
+  if (!file || !title || !description || !date || !amount) {
     return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
   }
 
@@ -38,15 +33,20 @@ export async function POST(req) {
   await writeFile(filePath, buffer);
   await connectDB();
 
+  // Handle tags as simple string
+  const tagsString = tags || '';
+  console.log('Tags string to store:', tagsString);
+
   const receipt = await Receipt.create({
     title,
     description,
-    tags: tags.split(',').map(tag => tag.trim()),
+    tags: tagsString, // Store as simple string
     date,
     amount,
     imageUrl: `/uploads/${fileName}`, // ✅ Include the image path
-    userId: session.user.email,
+    userId: 'anonymous', // Set a default userId for now
   });
 
+  console.log('Receipt created with tags:', receipt.tags);
   return NextResponse.json({ success: true, receipt });
 }

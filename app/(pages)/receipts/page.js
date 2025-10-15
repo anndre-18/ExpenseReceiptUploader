@@ -13,6 +13,8 @@ export default function Page() {
   const [searchQuery, setSearchQuery] = useState('');
   const [allTags, setAllTags] = useState(['All Tags']);
   const [selectedTag, setSelectedTag] = useState('All Tags');
+  const [selectedReceipt, setSelectedReceipt] = useState(null);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -96,6 +98,16 @@ export default function Page() {
       });
   };
 
+  const handleView = (receipt) => {
+    setSelectedReceipt(receipt);
+    setShowModal(true);
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+    setSelectedReceipt(null);
+  };
+
   const filteredReceipts = receipts.filter((receipt) => {
     const matchesSearch = receipt.title.toLowerCase().includes(searchQuery.toLowerCase());
     
@@ -133,7 +145,7 @@ export default function Page() {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
-        {/* <select
+        <select
           className={styles.filterDropdown}
           value={selectedTag}
           onChange={(e) => {
@@ -146,7 +158,7 @@ export default function Page() {
               {tag}
             </option>
           ))}
-        </select> */}
+        </select>
         <select className={styles.filterDropdown}>
           <option>Newest First</option>
         </select>
@@ -185,7 +197,10 @@ export default function Page() {
               </div>
 
               <div className={styles.actionButtons}>
-                <button className={styles.outlinedButton}>
+                <button 
+                  className={styles.outlinedButton}
+                  onClick={() => handleView(receipt)}
+                >
                   <i className="fas fa-eye"></i> View
                 </button>
                 <button
@@ -205,6 +220,42 @@ export default function Page() {
           </div>
         ))}
       </div>
+
+      {/* Modal for viewing receipt */}
+      {showModal && selectedReceipt && (
+        <div className={styles.modalOverlay} onClick={closeModal}>
+          <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <h3>{selectedReceipt.title}</h3>
+              <button className={styles.closeButton} onClick={closeModal}>
+                <i className="fas fa-times"></i>
+              </button>
+            </div>
+            <div className={styles.modalContent}>
+              {selectedReceipt.imageUrl ? (
+                <img
+                  src={selectedReceipt.imageUrl}
+                  alt={selectedReceipt.title}
+                  className={styles.modalImage}
+                />
+              ) : (
+                <div className={styles.noImage}>
+                  <i className="fas fa-image"></i>
+                  <p>No image available</p>
+                </div>
+              )}
+              <div className={styles.modalDetails}>
+                <p><strong>Description:</strong> {selectedReceipt.description}</p>
+                <p><strong>Date:</strong> {selectedReceipt.date}</p>
+                <p><strong>Amount:</strong> ₹{selectedReceipt.amount}</p>
+                {selectedReceipt.tags && (
+                  <p><strong>Tag:</strong> <span className={styles.tag}>{selectedReceipt.tags}</span></p>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

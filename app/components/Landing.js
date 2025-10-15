@@ -26,7 +26,7 @@ export default function Home() {
   return (
     <main className={styles.main}>
       <section className={styles.hero}>
-        <h1 className={styles.title}>Receipt Tag Vault</h1>
+        <h1 className={styles.title}>ExpenSnap - Expense Receipt Uploader</h1>
         <p className={styles.subtitle}>
           Securely upload, organize, and manage your expense receipts with smart tagging
         </p>
